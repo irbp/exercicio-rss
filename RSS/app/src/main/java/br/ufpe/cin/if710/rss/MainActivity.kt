@@ -4,6 +4,8 @@ import android.app.Activity
 import android.os.Bundle
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -34,9 +36,14 @@ class MainActivity : Activity() {
     override fun onStart() {
         super.onStart()
         try {
-            //Esse código dá pau, por fazer operação de rede na thread principal...
-            val feedXML = getRssFeed(RSS_FEED)
-            conteudoRSS.text = feedXML
+            //Esse código não dá mais pau, pois estamos obtendo o xml de maneira assíncrona
+            // utilizando o doAsync do anko
+            doAsync {
+                // obtém o xml
+                val feedXML = getRssFeed(RSS_FEED)
+                // atualiza o TextView (na ui thread) com o que foi obtido
+                uiThread { conteudoRSS.text = feedXML }
+            }
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -60,8 +67,7 @@ class MainActivity : Activity() {
                 count = inputStream.read(buffer)
             }
             val response = out.toByteArray()
-            rssFeed = response.toString()
-//            rssFeed = String(response, "UTF-8")
+            rssFeed = String(response, charset("UTF-8"))
         } finally {
             inputStream?.close()
         }
