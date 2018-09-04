@@ -2,7 +2,8 @@ package br.ufpe.cin.if710.rss
 
 import android.app.Activity
 import android.os.Bundle
-import android.widget.TextView
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
@@ -24,25 +25,26 @@ class MainActivity : Activity() {
     //http://pox.globo.com/rss/g1/ciencia-e-saude/
     //http://pox.globo.com/rss/g1/tecnologia/
 
-    //use ListView ao invés de TextView - deixe o atributo com o mesmo nome
-//    private var conteudoRSS: TextView? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-//        conteudoRSS = findViewById(R.id.conteudoRSS)
+
+        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL,
+                false)
+        conteudoRSS.layoutManager = layoutManager
     }
 
     override fun onStart() {
         super.onStart()
         try {
-            //Esse código não dá mais pau, pois estamos obtendo o xml de maneira assíncrona
+            // Esse código não dá mais pau, pois estamos obtendo o xml de maneira assíncrona
             // utilizando o doAsync do anko
             doAsync {
                 // obtém o xml
                 val feedXML = getRssFeed(RSS_FEED)
-                // atualiza o TextView (na ui thread) com o que foi obtido
-                uiThread { conteudoRSS.text = feedXML }
+                val itemsRss = ParserRSS.parse(feedXML)
+                // atualiza o recycler view (na ui thread) com o que foi obtido
+                uiThread { conteudoRSS.adapter = RssListAdapter(itemsRss,this@MainActivity) }
             }
         } catch (e: IOException) {
             e.printStackTrace()
