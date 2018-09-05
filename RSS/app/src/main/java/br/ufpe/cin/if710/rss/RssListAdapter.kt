@@ -37,6 +37,8 @@ class RssListAdapter(private val rssList: List<ItemRSS>,
             // clicando no título será feito um intent implícito para abrir o link no browser
             title.setOnClickListener {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(itemRss.link))
+                intent.addCategory(Intent.CATEGORY_BROWSABLE)
+                intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
                 context.startActivity(intent)
             }
         }

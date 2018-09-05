@@ -29,28 +29,38 @@ class MainActivity : Activity() {
 
         // obtendo endereço a partir do arquivo strings.xml
         RSS_FEED = getString(R.string.rssfeed)
+
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL,
                 false)
         conteudoRSS.layoutManager = layoutManager
+
+        swipe_layout.setOnRefreshListener { refreshContent() }
     }
 
     override fun onStart() {
         super.onStart()
         try {
-            // Esse código não dá mais pau, pois estamos obtendo o xml de maneira assíncrona
-            // utilizando o doAsync do anko
-            doAsync {
-                // obtém o xml
-                val feedXML = getRssFeed(RSS_FEED)
-                // faz o parsing do xml
-                val itemsRss = ParserRSS.parse(feedXML)
-                // populando o recycler view (na ui thread) com o que foi obtido pelo parser
-                uiThread { conteudoRSS.adapter = RssListAdapter(itemsRss,this@MainActivity) }
-            }
+            refreshContent()
         } catch (e: IOException) {
             e.printStackTrace()
         }
 
+    }
+
+    private fun refreshContent() {
+        // Esse código não dá mais pau, pois estamos obtendo o xml de maneira assíncrona
+        // utilizando o doAsync do anko
+        doAsync {
+            // obtém o xml
+            val feedXML = getRssFeed(RSS_FEED)
+            // faz o parsing do xml
+            val itemsRss = ParserRSS.parse(feedXML)
+            // populando o recycler view (na ui thread) com o que foi obtido pelo parser
+            uiThread {
+                conteudoRSS.adapter = RssListAdapter(itemsRss,this@MainActivity)
+                swipe_layout.isRefreshing = false
+            }
+        }
     }
 
     //Opcional - pesquise outros meios de obter arquivos da internet - bibliotecas, etc.
