@@ -3,7 +3,6 @@ package br.ufpe.cin.if710.rss
 import android.app.Activity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
@@ -16,8 +15,7 @@ import java.net.URL
 
 class MainActivity : Activity() {
 
-    //ao fazer envio da resolucao, use este link no seu codigo!
-    private val RSS_FEED = "http://leopoldomt.com/if1001/g1brasil.xml"
+    private lateinit var RSS_FEED: String
 
     //OUTROS LINKS PARA TESTAR...
     //http://rss.cnn.com/rss/edition.rss
@@ -29,6 +27,8 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // obtendo endereço a partir do arquivo strings.xml
+        RSS_FEED = getString(R.string.rssfeed)
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL,
                 false)
         conteudoRSS.layoutManager = layoutManager
@@ -42,8 +42,9 @@ class MainActivity : Activity() {
             doAsync {
                 // obtém o xml
                 val feedXML = getRssFeed(RSS_FEED)
+                // faz o parsing do xml
                 val itemsRss = ParserRSS.parse(feedXML)
-                // atualiza o recycler view (na ui thread) com o que foi obtido
+                // populando o recycler view (na ui thread) com o que foi obtido pelo parser
                 uiThread { conteudoRSS.adapter = RssListAdapter(itemsRss,this@MainActivity) }
             }
         } catch (e: IOException) {

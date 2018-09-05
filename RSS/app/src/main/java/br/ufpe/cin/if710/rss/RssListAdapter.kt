@@ -1,6 +1,8 @@
 package br.ufpe.cin.if710.rss
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.RecyclerView.Adapter
 import android.view.LayoutInflater
@@ -24,13 +26,19 @@ class RssListAdapter(private val rssList: List<ItemRSS>,
         holder.bind(itemRss)
     }
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(itemRss: ItemRSS) {
             val title = itemView.item_titulo
             val date = itemView.item_data
 
             title.text = itemRss.title
             date.text = itemRss.pubDate
+
+            // clicando no título será feito um intent implícito para abrir o link no browser
+            title.setOnClickListener {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(itemRss.link))
+                context.startActivity(intent)
+            }
         }
     }
 
